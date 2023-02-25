@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+// import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import Notiflix from 'notiflix';
@@ -7,20 +7,28 @@ import ContactForm from 'components/ContactForm/ContactForm';
 import ContactList from 'components/ContactList/ContactList';
 import Filter from 'components/Filter/Filter';
 
-import { addContacts, deleteContacts } from 'redux/actions';
+import { addContacts, deleteContacts } from 'redux/contacts/contacts-actions';
+import { setFilter } from 'redux/filter/filter-actions';
+
+import {
+  getAllContacts,
+  getFilteredContacts,
+} from 'redux/contacts/contacts-selectors';
+import { getFilter } from 'redux/filter/filter-celectors';
 
 import style from './contacts.module.css';
 
 const Contacts = () => {
-  const contacts = useSelector(store => store.contacts);
-  const [filter, setFilter] = useState('');
+  const allContacts = useSelector(getAllContacts);
+  const filter = useSelector(getFilter);
+  const filteredContacts = useSelector(getFilteredContacts);
 
   const dispatch = useDispatch();
 
   const isDublicate = (name, number) => {
     const normName = name.toLowerCase();
     const normNumber = number.toLowerCase();
-    const findContact = contacts.find(({ name, number }) => {
+    const findContact = allContacts.find(({ name, number }) => {
       return (
         name.toLowerCase() === normName && number.toLowerCase() === normNumber
       );
@@ -35,35 +43,18 @@ const Contacts = () => {
       );
       return false;
     }
-    const action = addContacts({ name, number });
-    dispatch(action);
+
+    dispatch(addContacts({ name, number }));
   };
 
   const onDeleteContact = id => {
-    const action = deleteContacts(id);
-    dispatch(action);
+    dispatch(deleteContacts(id));
   };
 
   const hendleFilter = ({ target }) => {
-    setFilter(target.value);
+    dispatch(setFilter(target.value));
   };
 
-  const getFilteredContacts = () => {
-    if (!filter) {
-      return contacts;
-    }
-    const normalizateFilter = filter.toLowerCase();
-    const result = contacts.filter(({ name, number }) => {
-      return (
-        name.toLowerCase().includes(normalizateFilter) ||
-        number.toLowerCase().includes(normalizateFilter)
-      );
-    });
-    return result;
-  };
-
-  const filteredContacts = getFilteredContacts();
-  console.log(filteredContacts);
   const isContacts = Boolean(filteredContacts.length);
 
   return (
@@ -72,11 +63,11 @@ const Contacts = () => {
       <ContactForm onSubmit={onAddContact} />
       <h2>Contacts</h2>
       <div className={style.block}>
-        <Filter handleChange={hendleFilter} />
+        <Filter value={filter} handleChange={hendleFilter} />
         {isContacts && (
           <ContactList
             deleteContact={onDeleteContact}
-            contacts={filteredContacts}
+            items={filteredContacts}
           />
         )}
         {!isContacts && <p>No contacts in list</p>}

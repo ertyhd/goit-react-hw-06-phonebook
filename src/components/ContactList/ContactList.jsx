@@ -1,13 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
 
 import contactList from './contactList.module.css';
 
-const ContactList = ({ deleteContact }) => {
-  const contacts_map = useSelector(store => store.contacts);
-
-  const elements = contacts_map.map(({ id, name, number }) => (
+const ContactList = ({ deleteContact, items }) => {
+  const elements = items.map(({ id, name, number }) => (
     <li className={contactList.listItem} key={id}>
       <span className={contactList.listItemText}>{name}</span>
       <span className={contactList.listItemText}>{number}</span>
